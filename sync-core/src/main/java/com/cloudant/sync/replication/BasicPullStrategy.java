@@ -328,7 +328,8 @@ class BasicPullStrategy implements ReplicationStrategy {
 
                     boolean ok = true;
                     // start tx
-                    this.targetDb.getDbCore().getSQLDatabase().beginTransaction();
+                    // need to change this so it uses its own db connection TODO
+                    this.targetDb.getDbCore().startTransaction();
                     this.targetDb.bulkInsert(result, config.pullAttachmentsInline);
 
                     // now add the attachments we have just downloaded
@@ -349,10 +350,10 @@ class BasicPullStrategy implements ReplicationStrategy {
                     }
 
                     if (ok) {
-                        this.targetDb.getDbCore().getSQLDatabase().setTransactionSuccessful();
+                        this.targetDb.getDbCore().transactionSuccessful();
                     }
                     // end tx
-                    this.targetDb.getDbCore().getSQLDatabase().endTransaction();
+                    this.targetDb.getDbCore().endTransaction();
 
                     changesProcessed++;
                 }

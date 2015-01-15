@@ -19,6 +19,7 @@ import com.cloudant.sync.util.CouchUtils;
 import com.cloudant.sync.util.DatabaseUtils;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -64,13 +65,6 @@ public class BasicDatastoreCRUDTest extends BasicDatastoreTestBase {
         String actual = this.datastore.extensionDataFolder("ext1");
         String expected = this.datastore.extensionsDir + File.separator + "ext1";
         Assert.assertEquals(expected, actual);
-    }
-
-    @Test
-    public void close_na_theSQLDatabaseIsClosed() {
-        Assert.assertTrue(this.database.isOpen());
-        this.datastore.close();
-        Assert.assertFalse(this.database.isOpen());
     }
 
     @Test(expected = IllegalStateException.class)

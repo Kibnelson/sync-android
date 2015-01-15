@@ -35,7 +35,7 @@ public abstract class DatastoreTestBase {
         datastore_manager_dir = TestUtils.createTempTestingDir(this.getClass().getName());
         datastoreManager = new DatastoreManager(this.datastore_manager_dir);
         datastore = (BasicDatastore)(this.datastoreManager.openDatastore(getClass().getSimpleName()));
-        database = this.datastore.getSQLDatabase();
+        database = TestUtils.getDatabaseConnectionFromDatastore(this.datastore);
     }
 
     @After

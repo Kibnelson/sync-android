@@ -15,6 +15,7 @@
 package com.cloudant.sync.datastore;
 
 import com.cloudant.sync.sqlite.Cursor;
+import com.cloudant.sync.sqlite.SQLDatabase;
 import com.cloudant.sync.util.Misc;
 import com.cloudant.sync.util.TestUtils;
 
@@ -27,7 +28,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -84,9 +84,11 @@ public class AttachmentTest extends BasicDatastoreTestBase {
             Assert.fail("FileNotFoundException not thrown");
         } catch (FileNotFoundException fnfe) {
             // now check that things got rolled back
-            Cursor c1 = datastore.getSQLDatabase().rawQuery("select sequence from attachments;", null);
+            SQLDatabase db = TestUtils.getDatabaseConnectionFromDatastore(datastore);
+            //TODO This needs to happen on the queue inside of the datastore
+            Cursor c1 = db.rawQuery("select sequence from attachments;", null);
             Assert.assertEquals("Attachments table not empty", c1.getCount(), 0);
-            Cursor c2 = datastore.getSQLDatabase().rawQuery("select sequence from revs;", null);
+            Cursor c2 = db.rawQuery("select sequence from revs;", null);
             Assert.assertEquals("Revs table not empty", c2.getCount(), 1);
         }
     }

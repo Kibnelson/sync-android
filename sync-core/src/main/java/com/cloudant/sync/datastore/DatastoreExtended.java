@@ -189,7 +189,10 @@ public interface DatastoreExtended extends Datastore {
      *
      * @return Handle the {@code Datastore} is using to access the underlying
      *          SQLite database file.
+     *
+     * @deprecated This method is deprecated, it has no replacement
      */
+    @Deprecated
     public SQLDatabase getSQLDatabase();
 
     /**
@@ -274,5 +277,8 @@ public interface DatastoreExtended extends Datastore {
      */
     public List<? extends Attachment> attachmentsForRevision(BasicDocumentRevision rev);
 
+    void startTransaction();
+    void transactionSuccessful();
+    void endTransaction();
 
 }

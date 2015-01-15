@@ -49,7 +49,6 @@ public abstract class ReplicationTestBase extends CouchTestBase {
     @After
     public void tearDown() throws Exception {
         datastore.close();
-        datastoreWrapper.getDbCore().close();
         TestUtils.deleteDatabaseQuietly(database);
         cleanUpTempFiles();
     }

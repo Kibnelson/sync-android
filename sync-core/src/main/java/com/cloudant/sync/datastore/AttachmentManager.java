@@ -16,6 +16,7 @@ package com.cloudant.sync.datastore;
 
 import com.cloudant.sync.sqlite.ContentValues;
 import com.cloudant.sync.sqlite.Cursor;
+import com.cloudant.sync.sqlite.SQLDatabase;
 import com.cloudant.sync.util.CouchUtils;
 import com.cloudant.sync.util.DatabaseUtils;
 
@@ -230,6 +231,7 @@ class AttachmentManager {
             }
             return atts;
         } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Failed to get attachments", e);
             return null;
         } finally {
             DatabaseUtils.closeCursorQuietly(c);
@@ -281,16 +283,20 @@ class AttachmentManager {
         DatabaseUtils.closeCursorQuietly(c);
     }
 
-    protected void purgeAttachments() {
+    /**
+     * Called by BasicDatastore on the execution queue, this needs have the db passed ot it
+     * @param db database to perge attachments from
+     */
+    protected void purgeAttachments(SQLDatabase db) {
         // it's easier to deal with Strings since java doesn't know how to compare byte[]s
         Set<String> currentKeys = new HashSet<String>();
         Cursor c = null;
         try {
             // delete attachment table entries for revs which have been purged
-            datastore.getSQLDatabase().delete("attachments", "sequence IN " +
+            db.delete("attachments", "sequence IN " +
                 "(SELECT sequence from revs WHERE json IS null)", null);
             // get all keys from attachments table
-             c = datastore.getSQLDatabase().rawQuery(SQL_ATTACHMENTS_SELECT_ALL_KEYS, null);
+             c = db.rawQuery(SQL_ATTACHMENTS_SELECT_ALL_KEYS, null);
             while (c.moveToNext()) {
                 byte[] key = c.getBlob(0);
                 currentKeys.add(keyToString(key));
