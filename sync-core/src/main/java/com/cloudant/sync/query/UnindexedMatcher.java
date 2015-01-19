@@ -154,10 +154,28 @@ class UnindexedMatcher {
         //
 
         // Add subclauses that are OR
-        // TODO - Handle OR subclauses
+        for (Object rawClause: clauses) {
+            Map<String, Object> clause = (Map<String, Object>) rawClause;
+            String field = (String) clause.keySet().toArray()[0];
+            if (field.startsWith("$or")) {
+                QueryNode orNode = buildExecutionTreeForSelector(clause);
+                if (root != null) {
+                    root.children.add(orNode);
+                }
+            }
+        }
 
         // Add subclauses that are AND
-        // TODO - Handle AND subclauses
+        for (Object rawClause: clauses) {
+            Map<String, Object> clause = (Map<String, Object>) rawClause;
+            String field = (String) clause.keySet().toArray()[0];
+            if (field.startsWith("$and")) {
+                QueryNode andNode = buildExecutionTreeForSelector(clause);
+                if (root != null) {
+                    root.children.add(andNode);
+                }
+            }
+        }
 
         return root;
     }
@@ -304,23 +322,73 @@ class UnindexedMatcher {
     //  3. TEXT
     //  4. BLOB
     protected static boolean compareLT(Object l, Object r) {
-        // TODO: 275 - 309 CDTQUnindexedMatcher.m
-        return false;
+        if (l == null) {
+            return false;  // null fails all lt/gt/lte/gte tests
+        } else if (!(l instanceof String || l instanceof Number && !(l instanceof Float))) {
+            String msg = String.format("Value in document not a Number or String: %s", l);
+            logger.log(Level.WARNING, msg);
+            return false;  // Not sure how to compare values that are not numbers or strings
+        } else if (l instanceof String) {
+            if (r instanceof Number) {
+                return false;  // INT < STRING
+            }
+
+            String lStr = (String) l;
+            String rStr = (String) r;
+
+            return lStr.compareTo(rStr) < 0;
+        } else if (r instanceof String) {
+            // At this point in the logic l can only be a number
+            return true;  // INT < STRING
+        } else {
+            // At this point in the logic both l and r can only be numbers
+            Number lNum = (Number) l;
+            Number rNum = (Number) r;
+
+            return lNum.longValue() < rNum.longValue();
+        }
     }
 
     protected static boolean compareLTE(Object l, Object r) {
-        // TODO: 311 - 323 CDTQUnindexedMatcher.m
-        return false;
+        if (l == null) {
+            return false;  // null fails all lt/gt/lte/gte tests
+        }
+
+        if (!(l instanceof String || l instanceof Number && !(l instanceof Float))) {
+            String msg = String.format("Value in document not a Number or String: %s", l);
+            logger.log(Level.WARNING, msg);
+            return false;  // Not sure how to compare values that are not numbers or strings
+        }
+
+        return compareLT(l, r) || compareEq(l, r);
     }
 
     protected static boolean compareGT(Object l, Object r) {
-        // TODO: 325 - 337 CDTQUnindexedMatcher.m
-        return false;
+        if (l == null) {
+            return false;  // null fails all lt/gt/lte/gte tests
+        }
+
+        if (!(l instanceof String || l instanceof Number && !(l instanceof Float))) {
+            String msg = String.format("Value in document not a Number or String: %s", l);
+            logger.log(Level.WARNING, msg);
+            return false;  // Not sure how to compare values that are not numbers or strings
+        }
+
+        return !(compareLTE(l, r));
     }
 
     protected static boolean compareGTE(Object l, Object r) {
-        // TODO: 339 - 351 CDTQUnindexedMatcher.m
-        return false;
+        if (l == null) {
+            return false;  // null fails all lt/gt/lte/gte tests
+        }
+
+        if (!(l instanceof String || l instanceof Number && !(l instanceof Float))) {
+            String msg = String.format("Value in document not a Number or String: %s", l);
+            logger.log(Level.WARNING, msg);
+            return false;  // Not sure how to compare values that are not numbers or strings
+        }
+
+        return !(compareLT(l, r));
     }
 
 }
