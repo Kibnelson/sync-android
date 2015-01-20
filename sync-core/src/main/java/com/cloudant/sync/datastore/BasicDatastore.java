@@ -500,10 +500,24 @@ class BasicDatastore implements Datastore, DatastoreExtended {
     }
 
     @Override
-    public List<String> getPossibleAncestorRevisionIDs(String docId,
-                                                       String revId,
-                                                       int limit) {
+    public List<String> getPossibleAncestorRevisionIDs(final String docId,
+                                                       final String revId,
+                                                       final int limit) {
+        try {
+            return queue.submit(new Callable<List<String>>(){
+                @Override
+                public List<String> call() throws Exception {
+                    return getPossibleAncestorRevisionIDsInBlock(docId,revId,limit);
+                }
+            }).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+           throw new RuntimeException(e);
+        }
+    }
 
+    private List<String> getPossibleAncestorRevisionIDsInBlock(String docId, String revId, int limit){
         int generation = CouchUtils.generationFromRevId(revId);
         if (generation <= 1)
             return null;
