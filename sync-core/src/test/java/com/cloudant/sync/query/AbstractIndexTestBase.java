@@ -26,6 +26,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
 
 public abstract class AbstractIndexTestBase {
 
@@ -34,9 +35,10 @@ public abstract class AbstractIndexTestBase {
     DatastoreExtended ds = null;
     IndexManager im = null;
     SQLDatabase db = null;
+    ExecutorService queue = null;
 
     @Before
-    public void setUp() throws SQLException {
+    public void setUp() throws Exception {
         factoryPath = TestUtils.createTempTestingDir(AbstractIndexTestBase.class.getName());
         assertThat(factoryPath, is(notNullValue()));
         factory = new DatastoreManager(factoryPath);
@@ -46,10 +48,11 @@ public abstract class AbstractIndexTestBase {
         im = new IndexManager(ds);
         assertThat(im, is(notNullValue()));
         db = im.getDatabase();
+        queue = TestUtils.getDBQueue(im);
         assertThat(db, is(notNullValue()));
         assertThat(im.getQueue(), is(notNullValue()));
         String[] metadataTableList = new String[] { IndexManager.INDEX_METADATA_TABLE_NAME };
-        SQLDatabaseTestUtils.assertTablesExist(TestUtils.getDatabaseConnectionToExsitingDb(db), metadataTableList);
+        SQLDatabaseTestUtils.assertTablesExist(queue,db, metadataTableList);
     }
 
     @After

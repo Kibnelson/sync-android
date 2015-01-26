@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.net.URISyntaxException;
+import java.util.concurrent.ExecutorService;
 
 public abstract class ReplicationTestBase extends CouchTestBase {
 
@@ -39,6 +40,8 @@ public abstract class ReplicationTestBase extends CouchTestBase {
     protected CouchClient couchClient = null;
 
     private long dbSuffix = System.currentTimeMillis();
+
+    protected ExecutorService databaseQueue = null;
 
     @Before
     public void setUp() throws Exception {
@@ -58,7 +61,8 @@ public abstract class ReplicationTestBase extends CouchTestBase {
         datastoreManagerPath = TestUtils.createTempTestingDir(this.getClass().getName());
         datastoreManager = new DatastoreManager(this.datastoreManagerPath);
         datastore = (DatastoreExtended) datastoreManager.openDatastore(getClass().getSimpleName());
-        database = datastore.getSQLDatabase();
+        database = TestUtils.getDatabaseConnectionFromDatastore(datastore);
+        databaseQueue = TestUtils.getDBQueue(datastore);
         datastoreWrapper = new DatastoreWrapper(datastore);
     }
 

@@ -26,6 +26,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * <p>{@code DatastoreExtended} adds further, lesser-used methods to the
@@ -180,20 +182,6 @@ public interface DatastoreExtended extends Datastore {
      * @see DatastoreExtended#forceInsert(BasicDocumentRevision, java.util.List, java.util.Map, boolean)
      */
     public void forceInsert(BasicDocumentRevision rev, String... revisionHistory);
-
-    /**
-     * <p>Returns a handle to the SQLite database used for low-level
-     * storage.</p>
-     *
-     * <p>This should rarely be called by developers.</p>
-     *
-     * @return Handle the {@code Datastore} is using to access the underlying
-     *          SQLite database file.
-     *
-     * @deprecated This method is deprecated, it has no replacement
-     */
-    @Deprecated
-    public SQLDatabase getSQLDatabase();
 
     /**
      * <p>Returns the datastore's unique identifier.</p>

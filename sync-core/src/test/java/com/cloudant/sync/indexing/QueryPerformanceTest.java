@@ -35,11 +35,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 @Category(PerformanceTest.class)
 public class QueryPerformanceTest {
 
     SQLDatabase database = null;
+    ExecutorService queue = null;
     DatastoreExtended datastore = null;
     IndexManager indexManager = null;
     private String datastoreManagerPath;
@@ -50,7 +52,8 @@ public class QueryPerformanceTest {
         datastoreManagerPath = TestUtils.createTempTestingDir(this.getClass().getName());
         DatastoreManager datastoreManager = new DatastoreManager(this.datastoreManagerPath);
         datastore = (DatastoreExtended) datastoreManager.openDatastore(getClass().getSimpleName());
-        database = datastore.getSQLDatabase();
+        database = TestUtils.getDatabaseConnectionFromDatastore(datastore);
+        queue = TestUtils.getDBQueue(datastore);
         indexManager = new IndexManager(datastore);
 
         indexManager.ensureIndexed("artist", "artist");

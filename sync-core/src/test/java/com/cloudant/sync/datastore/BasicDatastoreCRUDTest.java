@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -389,20 +390,27 @@ public class BasicDatastoreCRUDTest extends BasicDatastoreTestBase {
     }
 
     @Test
-    public void getPublicUUID_correctUUIDShouldBeReturned() throws SQLException {
+    public void getPublicUUID_correctUUIDShouldBeReturned() throws Exception {
         String publicUUID = datastore.getPublicIdentifier();
         Assert.assertNotNull(publicUUID);
 
-        Cursor cursor = null;
-        try {
-            String[] args = new String[]{ "publicUUID" };
-            cursor = database.rawQuery( " SELECT count(*) FROM info WHERE key = ? ", args);
-            cursor.moveToFirst();
-            Long count = cursor.getLong(0);
-            Assert.assertEquals(Long.valueOf(1L), count);
-        } finally {
-            DatabaseUtils.closeCursorQuietly(cursor);
-        }
+        queue.submit(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Cursor cursor = null;
+                try {
+                    String[] args = new String[]{ "publicUUID" };
+                    cursor = database.rawQuery( " SELECT count(*) FROM info WHERE key = ? ", args);
+                    cursor.moveToFirst();
+                    Long count = cursor.getLong(0);
+                    Assert.assertEquals(Long.valueOf(1L), count);
+                } finally {
+                    DatabaseUtils.closeCursorQuietly(cursor);
+                }
+                return null;
+            }
+        }).get();
+
     }
 
     @Test

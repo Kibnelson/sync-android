@@ -21,17 +21,37 @@ import org.junit.Assert;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
 
+import sun.reflect.annotation.ExceptionProxy;
+
 public class SQLDatabaseTestUtils {
 
-    public static void assertTablesExist(SQLDatabase db, String... tables) throws SQLException {
-        Set<String> allTables = getAllTableNames(db);
-        for(String table: tables) {
-            Assert.assertThat(allTables, hasItem(table));
+    public static void assertTablesExist(ExecutorService queue,final SQLDatabase db, final String... tables) throws Exception {
+
+        Callable<Object> callable = new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Set<String> allTables = getAllTableNames(db);
+                for (String table : tables) {
+                    Assert.assertThat(allTables, hasItem(table));
+                }
+                return null;
+            }
+        };
+
+        if(queue == null){
+            callable.call();
+        } else {
+
+            queue.submit(callable).get();
         }
+
     }
 
     public static void assertTablesNotExist(SQLDatabase db, String... tables) throws SQLException {

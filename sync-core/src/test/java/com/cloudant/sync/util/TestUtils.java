@@ -17,11 +17,13 @@ package com.cloudant.sync.util;
 import com.cloudant.sync.datastore.DatastoreExtended;
 import com.cloudant.sync.datastore.DocumentBody;
 import com.cloudant.sync.datastore.DocumentBodyFactory;
+import com.cloudant.sync.query.IndexManager;
 import com.cloudant.sync.sqlite.SQLDatabase;
 import com.cloudant.sync.sqlite.SQLDatabaseFactory;
 
 import org.apache.commons.io.FileUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -31,6 +33,7 @@ import java.io.InputStream;
 import java.sql.SQLData;
 import java.sql.SQLException;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 public class TestUtils {
 
@@ -157,50 +160,46 @@ public class TestUtils {
      */
    public static SQLDatabase getDatabaseConnectionFromDatastore(DatastoreExtended datastore){
 
-       if(Misc.isRunningOnAndroid())
-           return datastore.getSQLDatabase();
-
-       SQLDatabase datastoreDB = datastore.getSQLDatabase();
+       SQLDatabase datastoreDB = null; //datastore.getSQLDatabase();
 
        try {
-           String filePath = (String) datastoreDB.getClass()
-                   .getMethod("getDatabaseFile")
-                   .invoke(datastoreDB);
-           return SQLDatabaseFactory.openSqlDatabase(filePath);
-       } catch (IllegalAccessException e) {
+           Method m = datastore.getClass().getDeclaredMethod("getSQLDatabase");
+           m.setAccessible(true);
+           datastoreDB = (SQLDatabase) m.invoke(datastore);
+
+       } catch (NoSuchMethodException e) {
            e.printStackTrace();
        } catch (InvocationTargetException e) {
            e.printStackTrace();
-       } catch (NoSuchMethodException e) {
-           e.printStackTrace();
-       } catch (IOException e) {
-           e.printStackTrace();
-       }
-
-       return null;
-   }
-
-   public static SQLDatabase getDatabaseConnectionToExsitingDb(SQLDatabase db){
-       if(Misc.isRunningOnAndroid())
-           return db;
-
-       try {
-           String filePath = (String) db.getClass()
-                   .getMethod("getDatabaseFile")
-                   .invoke(db);
-           return SQLDatabaseFactory.openSqlDatabase(filePath);
        } catch (IllegalAccessException e) {
            e.printStackTrace();
-       } catch (InvocationTargetException e) {
-           e.printStackTrace();
-       } catch (NoSuchMethodException e) {
-           e.printStackTrace();
-       } catch (IOException e) {
-           e.printStackTrace();
        }
 
-       return null;
+       return datastoreDB;
+
    }
+
+    public static ExecutorService getDBQueue(DatastoreExtended datastore){
+        return TestUtils.getDBQueue((Object)datastore);
+    }
+
+    public static ExecutorService getDBQueue(IndexManager im){
+        return TestUtils.getDBQueue((Object)im);
+    }
+
+    private static ExecutorService getDBQueue(Object obj){
+        try {
+            Field f = obj.getClass().getDeclaredField("queue");
+            f.setAccessible(true);
+            return (ExecutorService) f.get(obj);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
 
 }

@@ -34,19 +34,22 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 public class BasicQueryResultTest {
 
     SQLDatabase database = null;
     DatastoreExtended datastore = null;
     private String datastoreManagerPath;
+    ExecutorService queue = null;
 
     @Before
     public void setUp() throws IOException, SQLException {
         datastoreManagerPath = TestUtils.createTempTestingDir(this.getClass().getName());
         DatastoreManager datastoreManager = new DatastoreManager(this.datastoreManagerPath);
         datastore = (DatastoreExtended) datastoreManager.openDatastore(getClass().getSimpleName());
-        database = datastore.getSQLDatabase();
+        database = TestUtils.getDatabaseConnectionFromDatastore(datastore);
+        queue = TestUtils.getDBQueue(datastore);
 
         for (int i = 0; i < 8; i++) {
             MutableDocumentRevision rev = new MutableDocumentRevision();

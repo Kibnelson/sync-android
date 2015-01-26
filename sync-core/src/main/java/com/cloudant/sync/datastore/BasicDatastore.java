@@ -1037,7 +1037,6 @@ class BasicDatastore implements Datastore, DatastoreExtended {
         return result;
     }
 
-    @Override
     public SQLDatabase getSQLDatabase() {
         Preconditions.checkState(this.isOpen(), "Database is closed");
         return this.sqlDb;

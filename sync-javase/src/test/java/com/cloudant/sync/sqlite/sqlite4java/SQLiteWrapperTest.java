@@ -106,7 +106,7 @@ public class SQLiteWrapperTest {
         } finally {
             database.endTransaction();
         }
-        SQLDatabaseTestUtils.assertTablesExist(this.database, "docs");
+        SQLDatabaseTestUtils.assertTablesExist(null,this.database, "docs");
     }
 
     /**
@@ -116,7 +116,7 @@ public class SQLiteWrapperTest {
      *
      */
     @Test
-    public void nestedTransaction_twoChainedTransactionAndAllTransactionSuccess_commit() throws SQLException {
+    public void nestedTransaction_twoChainedTransactionAndAllTransactionSuccess_commit() throws Exception {
         this.database.beginTransaction();
         try {
             this.nestedSuccessfulTransaction(create_doc_table);
@@ -125,7 +125,7 @@ public class SQLiteWrapperTest {
             this.database.endTransaction();
         }
 
-        SQLDatabaseTestUtils.assertTablesExist(this.database, "docs");
+        SQLDatabaseTestUtils.assertTablesExist(null,this.database, "docs");
     }
 
     /**
@@ -174,7 +174,7 @@ public class SQLiteWrapperTest {
      *
      */
     @Test
-    public void nestedTransaction_threeChainedTransactionAndAllTransactionSuccess_commit() throws SQLException {
+    public void nestedTransaction_threeChainedTransactionAndAllTransactionSuccess_commit() throws Exception {
         this.database.beginTransaction();
         try {
             this.database.beginTransaction();
@@ -190,7 +190,7 @@ public class SQLiteWrapperTest {
             this.database.endTransaction();
         }
 
-        SQLDatabaseTestUtils.assertTablesExist(this.database, "docs", "revs");
+        SQLDatabaseTestUtils.assertTablesExist(null,this.database, "docs", "revs");
     }
 
     /**
@@ -258,7 +258,7 @@ public class SQLiteWrapperTest {
      *   \-> 3
      */
     @Test
-    public void nestedTransaction_twoLevelThreeTransactionAndAllTransactionSuccess_commit() throws SQLException {
+    public void nestedTransaction_twoLevelThreeTransactionAndAllTransactionSuccess_commit() throws Exception {
         this.database.beginTransaction();
         try {
             this.nestedSuccessfulTransaction(create_doc_table);
@@ -268,7 +268,7 @@ public class SQLiteWrapperTest {
             this.database.endTransaction();
         }
 
-        SQLDatabaseTestUtils.assertTablesExist(this.database, "docs", "revs");
+        SQLDatabaseTestUtils.assertTablesExist(null,this.database, "docs", "revs");
     }
 
     /**
@@ -304,7 +304,7 @@ public class SQLiteWrapperTest {
      * transactions successfully before calling another nested transaction.
      */
     @Test
-    public void nestedTransaction_markSuccessBeforeSuccessfulTransaction_commit() throws SQLException {
+    public void nestedTransaction_markSuccessBeforeSuccessfulTransaction_commit() throws Exception {
         this.database.beginTransaction();
         try {
             this.nestedSuccessfulTransaction(create_doc_table);
@@ -314,7 +314,7 @@ public class SQLiteWrapperTest {
             this.database.endTransaction();
         }
 
-        SQLDatabaseTestUtils.assertTablesExist(this.database, "docs", "revs");
+        SQLDatabaseTestUtils.assertTablesExist(null,this.database, "docs", "revs");
     }
 
     /**
@@ -348,7 +348,7 @@ public class SQLiteWrapperTest {
      *
      */
     @Test
-    public void nestedTransaction_serialTransactions() throws SQLException {
+    public void nestedTransaction_serialTransactions() throws Exception {
         this.database.beginTransaction();
         try {
             this.nestedSuccessfulTransaction(create_rev_table);
@@ -356,7 +356,7 @@ public class SQLiteWrapperTest {
         } finally {
             this.database.endTransaction();
         }
-        SQLDatabaseTestUtils.assertTablesExist(this.database, "revs");
+        SQLDatabaseTestUtils.assertTablesExist(null,this.database, "revs");
 
         this.database.beginTransaction();
         try {
@@ -365,7 +365,7 @@ public class SQLiteWrapperTest {
         } finally {
             this.database.endTransaction();
         }
-        SQLDatabaseTestUtils.assertTablesExist(this.database, "revs");
+        SQLDatabaseTestUtils.assertTablesExist(null,this.database, "revs");
 
         this.database.beginTransaction();
         try {
@@ -395,8 +395,7 @@ public class SQLiteWrapperTest {
      */
     @Test
     @Ignore
-    public void nestedTransaction_runInNewThread()
-            throws SQLException, InterruptedException {
+    public void nestedTransaction_runInNewThread() throws Exception{
 
         Thread t = new Thread() {
             @Override
@@ -417,7 +416,7 @@ public class SQLiteWrapperTest {
         t.start();
         t.join();
 
-        SQLDatabaseTestUtils.assertTablesExist(this.database, "docs", "revs");
+        SQLDatabaseTestUtils.assertTablesExist(null,this.database, "docs", "revs");
     }
 
     @Test(expected = IllegalArgumentException.class)
